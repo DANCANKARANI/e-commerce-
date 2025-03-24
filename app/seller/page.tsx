@@ -4,19 +4,22 @@ import { useState } from "react";
 import Footer from "../components/footer";
 import Navbar from "../components/navbar";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"; // Import js-cookie to handle cookies
+
+const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export default function LoginPage() {
   const router = useRouter();
 
   // State to manage login form inputs
   const [formData, setFormData] = useState({
-    email: "",
+    phone_number: "", // Use phone_number to match API format
     password: "",
   });
 
   // State to manage login form errors
   const [errors, setErrors] = useState({
-    email: "",
+    phone_number: "",
     password: "",
   });
 
@@ -38,14 +41,16 @@ export default function LoginPage() {
     let isValid = true;
     const newErrors = { ...errors };
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+    // Validate phone number
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = "Phone Number is required";
       isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email address";
+    } else if (!/^\d{10}$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Invalid phone number (10 digits required)";
       isValid = false;
     }
 
+    // Validate password
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
       isValid = false;
@@ -56,18 +61,60 @@ export default function LoginPage() {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      console.log("Login Data Submitted:", formData);
-      alert("Login Successful!");
-      setFormData({
-        email: "",
-        password: "",
-      });
-      // Redirect to the product/service listing page after successful login
-      router.push("/seller/dashboard"); // Replace with your dashboard or listing page route
+      try {
+        console.log("Submitting form data:", formData); // Debug: Log form data
+
+        // Submit the form data to the API
+        const response = await fetch(`${API_URL}/user/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone_number: formData.phone_number, // Use phone_number to match API format
+            password: formData.password,
+          }),
+        });
+
+        console.log("Response status:", response.status); // Debug: Log response status
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Login successful:", data); // Debug: Log success response
+
+          // Extract the token from the response
+          const token = data.data.token;
+
+          // Save the token to cookies
+          Cookies.set("jwt", token, { expires: 1 }); // Expires in 1 day
+
+          // Reset form after submission
+          setFormData({
+            phone_number: "",
+            password: "",
+          });
+
+          // Redirect to the seller dashboard after successful login
+          console.log("Redirecting to /seller/dashboard");
+          router.push("/seller/dashboard");
+        } else {
+          const text = await response.text();
+          console.log("Login failed:", text); // Debug: Log failure response
+          try {
+            const errorData = JSON.parse(text);
+            alert(`Login Failed: ${errorData.message}`);
+          } catch {
+            alert(`Login Failed: ${text}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error); // Debug: Log any errors
+        alert("An error occurred while submitting the form.");
+      }
     } else {
       alert("Please fix the errors in the form.");
     }
@@ -80,6 +127,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Navbar */}
+      <Navbar />
+
       {/* Main Content */}
       <section className="flex-grow py-16 px-4 md:px-8 bg-gray-50">
         <div className="max-w-md mx-auto">
@@ -88,23 +138,25 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded-lg space-y-6">
-            {/* Email */}
+            {/* Phone Number */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+              <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
+                Phone Number
               </label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="phone_number"
+                name="phone_number"
+                value={formData.phone_number}
                 onChange={handleInputChange}
-                placeholder="Enter your email"
+                placeholder="Enter your phone number"
                 className={`mt-1 block w-full px-4 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
+                  errors.phone_number ? "border-red-500" : "border-gray-300"
                 } rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500`}
               />
-              {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+              {errors.phone_number && (
+                <p className="text-sm text-red-500 mt-1">{errors.phone_number}</p>
+              )}
             </div>
 
             {/* Password */}

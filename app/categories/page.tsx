@@ -12,6 +12,7 @@ const categories = [
   { id: 6, name: "Music & Audio", icon: "🎵", slug: "music-audio" },
   { id: 7, name: "Marketing", icon: "📈", slug: "marketing" },
   { id: 8, name: "Fitness & Wellness", icon: "💪", slug: "fitness-wellness" },
+  { id: 9, name: "Others", icon: "➕", slug: "others" }, // Add "Others" category
 ];
 
 export default function Home() {
@@ -30,7 +31,9 @@ export default function Home() {
             <Link
               key={category.id}
               href={`/categories/${category.slug}`} // Link to category-specific page
-              className="bg-white p-6 shadow-md rounded-md text-center hover:shadow-lg transition-shadow"
+              className={`bg-white p-6 shadow-md rounded-md text-center hover:shadow-lg transition-shadow ${
+                category.slug === "others" ? "border-2 border-dashed border-gray-300" : ""
+              }`}
             >
               <div className="text-4xl mb-4">{category.icon}</div>
               <h2 className="text-xl font-semibold text-gray-800">{category.name}</h2>

@@ -3,11 +3,32 @@
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 import { ShoppingCart, Menu } from "lucide-react"; // Import Menu icon for mobile toggle
-import { useState } from "react"; // For mobile menu state
+import { useState, useEffect } from "react"; // For mobile menu state and checking cookies
+import Cookies from "js-cookie"; // To handle cookies
+import { useRouter } from "next/navigation"; // To handle redirects
 
 export default function Navbar() {
   const { cart } = useCart(); // Get cart state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const router = useRouter(); // For redirects
+
+  // Check if the user is logged in on component mount
+  useEffect(() => {
+    const jwt = Cookies.get("jwt");
+    if (jwt) {
+      setIsLoggedIn(true); // User is logged in
+    } else {
+      setIsLoggedIn(false); // User is not logged in
+    }
+  }, []);
+
+  // Handle logout
+  const handleLogout = () => {
+    Cookies.remove("jwt"); // Remove the JWT cookie
+    setIsLoggedIn(false); // Update login state
+    router.push("/"); // Redirect to home page
+  };
 
   return (
     <nav className="bg-white shadow-md py-4 px-8 flex justify-between items-center fixed w-full top-0 z-50">
@@ -57,7 +78,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Cart and Login */}
+      {/* Cart, Profile, and Login/Logout */}
       <div className="flex items-center space-x-4">
         <Link href="/cart" className="relative" aria-label="Cart">
           <ShoppingCart className="w-6 h-6 text-gray-600 hover:text-blue-600 transition-colors" />
@@ -67,12 +88,36 @@ export default function Navbar() {
             </span>
           )}
         </Link>
-        <button
-          className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-          aria-label="Login"
-        >
-          Login
-        </button>
+
+        {/* My Profile Button (visible only when logged in) */}
+        {isLoggedIn && (
+          <Link
+            href="/profile"
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+            aria-label="My Profile"
+          >
+            My Profile
+          </Link>
+        )}
+
+        {/* Conditionally render Login or Logout button */}
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+            aria-label="Logout"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            href="/customer"
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+            aria-label="Login"
+          >
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );

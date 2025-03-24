@@ -16,22 +16,13 @@ interface Address {
   country: string;
 }
 
-// Utility function to clean and convert price strings
-const cleanPrice = (price: string): number => {
-  const cleanedPrice = price.replace(/[^0-9.]/g, "");
-  return parseFloat(cleanedPrice);
-};
-
 export default function Cart() {
   const { cart, removeFromCart } = useCart();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "address" | "payment">("cart");
   const [shippingAddress, setShippingAddress] = useState<Address | null>(null);
 
   // Calculate total amount
-  const totalAmount = cart.reduce(
-    (acc: number, item: CartItem) => acc + cleanPrice(item.price) * item.quantity,
-    0
-  );
+  const totalAmount = cart.reduce((acc: number, item: CartItem) => acc + item.price * item.quantity, 0);
 
   const handleProceedToCheckout = () => {
     setCheckoutStep("address");
@@ -64,10 +55,10 @@ export default function Cart() {
                   {cart.map((item: CartItem) => (
                     <div key={item.id} className="bg-white shadow-md rounded-md p-4">
                       <h3 className="text-lg font-semibold">{item.name}</h3>
-                      <p className="text-gray-600">${item.price}</p>
+                      <p className="text-gray-600">KSh {item.price.toLocaleString()}</p>
                       <p className="text-gray-500">Quantity: {item.quantity}</p>
                       <button
-                        className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md text-sm"
+                        className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md text-sm hover:bg-red-600"
                         onClick={() => removeFromCart(item.id)}
                       >
                         Remove
@@ -78,7 +69,7 @@ export default function Cart() {
 
                 {/* Total Amount & Checkout Button */}
                 <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow-md text-center">
-                  <h3 className="text-xl font-semibold">Total Amount: ${totalAmount.toFixed(2)}</h3>
+                  <h3 className="text-xl font-semibold">Total Amount: KSh {totalAmount.toLocaleString()}</h3>
                   <button
                     onClick={handleProceedToCheckout}
                     className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-md text-lg hover:bg-blue-700"

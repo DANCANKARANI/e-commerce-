@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+// next.config.js
+const nextConfig = {
+  images: {
+    domains: ["pentabyte.blob.core.windows.net"], // Add your domain here
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

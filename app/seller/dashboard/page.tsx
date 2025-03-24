@@ -1,46 +1,39 @@
 "use client";
 
-
-import ProductListingComponent from "@/app/components/productListing";
 import React, { useState } from "react";
-import Navbar from "./Navbar";
-
-import { Sidebar } from "./sidebar";
-import { ServiceListingComponent } from "@/app/components/serviceListing";
 import Footer from "@/app/components/footer";
-
+import { Sidebar } from "./components/sidebar";
+import Navbar from "./components/Navbar";
+import ProductListingComponent from "./components/productListing";
+import ServiceListings from "./components/serviceListings";
+import { DashboardComponent } from "./components/dashboardComponent";
+import ViewProducts from "./components/viewProducts";
+import ViewServices from "./components/viewServices";
+import MyProfile from "./components/myProfile";
 
 export default function SellerDashboard() {
-  const [listingType, setListingType] = useState("");
+  const [selectedComponent, setSelectedComponent] = useState("dashboard");
 
-  const handleSelection = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-    setListingType(event.target.value);
+  // Handle component selection from the sidebar
+  const handleComponentSelection = (component: string) => {
+    setSelectedComponent(component);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex flex-1">
-      <Sidebar/>
+        {/* Sidebar with component selection */}
+        <Sidebar onSelect={handleComponentSelection} />
         <div className="flex-1 bg-gray-100 p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">List a Product or Service</h1>
-            <p className="text-gray-600 mb-6">What would you like to list?</p>
-
-            {/* Dropdown for selecting listing type */}
-            <select
-              onChange={handleSelection}
-              value={listingType}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-8"
-            >
-              <option value="">Select an option</option>
-              <option value="product">Product</option>
-              <option value="service">Service</option>
-            </select>
-
-            {/* Conditionally render the selected component */}
-            {listingType === "product" && <ProductListingComponent />}
-            {listingType === "service" && <ServiceListingComponent />}
+            {/* Render the selected component */}
+            {selectedComponent === "dashboard" && <DashboardComponent />}
+            {selectedComponent === "viewProducts" && <ViewProducts />}
+            {selectedComponent === "addProducts" && <ProductListingComponent />}
+            {selectedComponent === "viewServices" && <ViewServices/>}
+            {selectedComponent === "myProfile" && <MyProfile/>}
+            {selectedComponent === "addServices" && <ServiceListings />}
           </div>
         </div>
       </div>
