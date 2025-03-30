@@ -80,7 +80,7 @@ export default function ContactUs() {
                   </div>
                   <div className="ml-4">
                     <p className="text-gray-600">Phone</p>
-                    <p className="text-gray-800 font-medium">+1 (123) 456-7890</p>
+                    <p className="text-gray-800 font-medium">+254 (707) 895 563</p>
                   </div>
                 </div>
                 <div className="flex items-center">

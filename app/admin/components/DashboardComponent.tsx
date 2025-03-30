@@ -411,7 +411,7 @@ export default function DashboardComponent() {
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip 
                     formatter={(value, name) => [
-                      name === 'Revenue ($)' ? `$${value.toLocaleString()}` : value,
+                      name === 'Revenue (ksh)' ? `$${value.toLocaleString()}` : value,
                       name
                     ]}
                   />
