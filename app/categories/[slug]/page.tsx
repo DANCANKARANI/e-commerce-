@@ -133,7 +133,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                     <p className="text-gray-600">KSh {provider.price.toLocaleString()}</p>
                     {provider.User ? (
                       <a
-                        href={`https://wa.me/${provider.User.phone_number}?text=Hi,%20I%20am%20interested%20in%20your%20${provider.name}%20service.`}
+                        href={`https://wa.me/${+254+provider.User.phone_number}?text=Hi,%20I%20am%20interested%20in%20your%20${provider.name}%20service.`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
