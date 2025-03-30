@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Footer from "../components/footer";
-import Navbar from "../components/navbar";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
@@ -118,7 +117,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
       
       <section className="flex-grow py-16 px-4 md:px-8 bg-gray-50">
         <div className="max-w-md mx-auto">
