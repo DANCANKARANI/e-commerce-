@@ -274,9 +274,9 @@ export default function SalesReports() {
                             className={`px-2 py-1 rounded-full text-xs ${
                               order.order_status === 'Delivered'
                                 ? 'bg-green-100 text-green-800'
-                                : order.order_status === 'Processing'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
+                                : order.order_status === 'Placed'
+                                ? 'bg-blue-100 text-gray-800'
+                                : 'bg-gray-100 text-blue-800'
                             }`}
                           >
                             {order.order_status}
