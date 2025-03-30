@@ -5,13 +5,7 @@ import Cookies from "js-cookie";
 
 const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
-// Define category options
-const CATEGORIES = [
-  { value: "kids", label: "Kids" },
-  { value: "men", label: "Men" },
-  { value: "ladies", label: "Ladies" },
-  { value: "unisex", label: "Unisex" },
-];
+
 
 export default function ProductListingComponent() {
   const [productData, setProductData] = useState({
