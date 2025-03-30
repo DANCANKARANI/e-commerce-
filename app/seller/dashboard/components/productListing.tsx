@@ -249,23 +249,17 @@ export default function ProductListingComponent() {
         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
           Category *
         </label>
-        <select
+        <input
           id="category"
           name="category"
           value={productData.category}
           onChange={handleInputChange}
+          placeholder="Enter available stock"
           className={`mt-1 block w-full px-4 py-2 border ${
             errors.category ? "border-red-500" : "border-gray-300"
           } rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-        >
-          <option value="">Select a category</option>
-          {CATEGORIES.map((category) => (
-            <option key={category.value} value={category.value}>
-              {category.label}
-            </option>
-          ))}
-        </select>
-        {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
+        />
+         
       </div>
 
       {/* Product Image */}
