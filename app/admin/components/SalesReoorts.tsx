@@ -205,7 +205,7 @@ export default function SalesReports() {
                     <div className="flex justify-between">
                       <h3 className="font-medium">{category.name}</h3>
                       <span>
-                        ${category.amount.toLocaleString()} ({category.percentage}%)
+                        ksh{category.amount.toLocaleString()} ({category.percentage}%)
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
@@ -253,7 +253,7 @@ export default function SalesReports() {
                           {order.order_number}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${order.total_amount.toLocaleString()}
+                          ksh{order.total_amount.toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {dayjs(order.created_at).format('MMM D, YYYY h:mm A')}
@@ -261,11 +261,12 @@ export default function SalesReports() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
-                              order.payment_status === 'Completed'
+                              order.payment_status === 'pending'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
+                            {order.payment_status="completed"}
                             {order.payment_status}
                           </span>
                         </td>

@@ -31,7 +31,7 @@ import {
 
 interface User {
   id: string;
-  name: string;
+  first_name: string;
   email: string;
   createdAt: string;
   lastLogin?: string;
@@ -208,7 +208,7 @@ export default function DashboardComponent() {
       .slice(0, 5)
       .map(user => ({
         id: user?.id ?? 'unknown',
-        name: user?.name ?? 'Unknown',
+        first_name: user?.first_name ?? 'Unknown',
         email: user?.email ?? 'unknown@example.com',
         role: user?.role ?? 'customer',
         status: user?.status ?? 'inactive',
@@ -487,7 +487,7 @@ export default function DashboardComponent() {
               <TableBody>
                 {dashboardData.recentUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.first_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <span className={`capitalize ${user.role === 'admin' ? 'text-purple-600' : 
