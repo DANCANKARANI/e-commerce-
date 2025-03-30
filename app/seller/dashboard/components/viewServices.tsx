@@ -253,7 +253,7 @@ export default function ViewServices() {
                         {service.name}
                       </h2>
                       <p className="text-gray-600">{service.description}</p>
-                      <p className="text-gray-600">Price: ${service.price}</p>
+                      <p className="text-gray-600">Price: ksh{service.price}</p>
                       <p className="text-gray-600">Category: {service.category}</p>
                       <div className="flex space-x-4 mt-4">
                         <button
