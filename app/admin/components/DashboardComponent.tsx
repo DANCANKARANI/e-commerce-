@@ -381,7 +381,7 @@ export default function DashboardComponent() {
           <CardContent>
             <Typography color="textSecondary" gutterBottom>Monthly Revenue</Typography>
             <Typography variant="h4" component="div">
-              ${dashboardData.monthlyRevenue.toLocaleString(undefined, {
+              ksh{dashboardData.monthlyRevenue.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })}
@@ -411,7 +411,7 @@ export default function DashboardComponent() {
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip 
                     formatter={(value, name) => [
-                      name === 'Revenue (ksh)' ? `ksh${value.toLocaleString()}` : value,
+                      name === 'Revenue (ksh)' ? `${value.toLocaleString()}` : value,
                       name
                     ]}
                   />
