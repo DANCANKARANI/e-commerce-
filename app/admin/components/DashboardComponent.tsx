@@ -82,6 +82,7 @@ export default function DashboardComponent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  
 
   const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
@@ -122,20 +123,25 @@ export default function DashboardComponent() {
       ]);
 
       // Extract data from potential wrapper objects
-      const extractArray = (data: any, potentialKeys: string[]): any[] => {
+      const extractArray = (data: unknown, potentialKeys: string[]): unknown[] => {
         if (Array.isArray(data)) return data;
         for (const key of potentialKeys) {
-          if (data?.[key] && Array.isArray(data[key])) {
-            return data[key];
+          if (typeof data === 'object' && data !== null && key in data) {
+            const value = (data as Record<string, unknown>)[key];
+            if (Array.isArray(value)) {
+              return value;
+            }
           }
         }
         return [];
       };
+      
 
-      setUsers(extractArray(usersData, ['data', 'users']));
-      setProducts(extractArray(productsData, ['data', 'products']));
-      setServices(extractArray(servicesData, ['data', 'services']));
-      setOrders(extractArray(ordersData, ['data', 'orders']));
+    setUsers(extractArray(usersData, ['data', 'users']) as User[]);
+    setProducts(extractArray(productsData, ['data', 'products']) as Product[]);
+    setServices(extractArray(servicesData, ['data', 'services']) as Service[]);
+    setOrders(extractArray(ordersData, ['data', 'orders']) as Order[]);
+
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err);

@@ -88,7 +88,7 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-gray-800">What Students Say</h2>
         <div className="mt-6">
           <p className="text-xl text-gray-700 italic">
-            "I made my first sale in 24 hours! This platform helped me turn my talent into income."
+          &quot;I made my first sale in 24 hours! This platform helped me turn my talent into income&quot;
           </p>
           <p className="mt-2 font-semibold text-blue-600">- Jane K., Student</p>
         </div>

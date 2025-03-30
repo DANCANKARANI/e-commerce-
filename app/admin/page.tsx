@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Footer from "@/app/components/footer";
 import Sidebar from "./components/sidebar";
-import Navbar from "./components/navbar";
 import DashboardComponent from "./components/DashboardComponent";
 import CustomerReports from "./components/CustomerReports";
 

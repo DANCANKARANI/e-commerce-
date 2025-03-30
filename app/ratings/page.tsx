@@ -4,7 +4,6 @@ import Footer from "../components/footer";
 import Navbar from "../components/navbar";
 import Cookies from "js-cookie";
 import { FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -27,7 +26,6 @@ interface Rating {
 }
 
 export default function Ratings() {
-  const router = useRouter();
   const [sellerId, setSellerId] = useState<string>("");
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
@@ -103,7 +101,7 @@ export default function Ratings() {
     }
   };
 
-  const processRatingsData = (ratingsData: any[]) => {
+  const processRatingsData = (ratingsData: Rating[]) => {
     const mappedRatings = ratingsData.map((item) => ({
       id: item.id,
       seller_id: item.seller_id,

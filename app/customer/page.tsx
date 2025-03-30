@@ -103,7 +103,7 @@ export default function LoginPage() {
 
         {/* Link to Sign-Up Page */}
         <div className="mt-4 text-center">
-          <p className="text-gray-600">Don't have an account?</p>
+          <p className="text-gray-600">Don`&apos;`t have an account?</p>
           <Link
             href="/customer/signup"
             className="text-blue-500 hover:text-blue-700 font-bold"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircularProgress, Alert } from "@mui/material";
+import { CircularProgress} from "@mui/material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -22,7 +22,7 @@ interface User {
 
 export default function SellerReports() {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
   const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
