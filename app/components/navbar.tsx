@@ -41,7 +41,7 @@ export default function Navbar() {
           Home
         </Link>
         <Link href="/categories" className="text-gray-600 hover:text-blue-600 transition-colors">
-          Categories
+          Services
         </Link>
         <Link href="/how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors">
           How It Works
