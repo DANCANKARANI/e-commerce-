@@ -5,7 +5,6 @@ import {
   Users,
   ShoppingBag,
   LineChart,
-  FileText,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -34,10 +33,6 @@ export default function Sidebar({ onSelect, currentComponent }: SidebarProps) {
       id: "salesReports",
       name: "Sales Reports",
       icon: <LineChart className="w-5 h-5" />,
-    },
-    {
-      id: "systemReports",
-      icon: <FileText className="w-5 h-5" />,
     },
   ];
 
