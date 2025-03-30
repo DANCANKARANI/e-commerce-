@@ -12,7 +12,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 // Define the User interface
 interface User {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   phone_number: string;
   email: string;
   profile_photo_path: string;
@@ -153,7 +154,7 @@ export default function MyProfile() {
               {!editMode ? (
                 <div className="space-y-4">
                   <div>
-                    <p className="text-gray-600">Full Name: {user.full_name}</p>
+                    <p className="text-gray-600">Full Name: {user.first_name+" "+user.last_name}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Phone Number: {user.phone_number}</p>
