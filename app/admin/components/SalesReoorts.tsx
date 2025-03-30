@@ -261,12 +261,12 @@ export default function SalesReports() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
-                              order.payment_status === 'pending'
+                              order.payment_status === 'completed'
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-green-100 text-green-800'
                             }`}
                           >
-                            {order.payment_status}
+                            {"completed"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -279,7 +279,7 @@ export default function SalesReports() {
                                 : 'bg-gray-100 text-blue-800'
                             }`}
                           >
-                            {order.order_status}
+                            {"placed"}
                           </span>
                         </td>
                       </tr>
