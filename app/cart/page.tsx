@@ -4,25 +4,58 @@ import Footer from "../components/footer";
 import Navbar from "../components/navbar";
 import Payment from "../components/payment";
 import ShippingAddress from "../components/shippingAddress";
-import { useCart, CartItem } from "../context/CartContext"; // Import CartItem from context
+import { useCart, CartItem } from "../context/CartContext";
 import { useState } from "react";
+import Cookies from "js-cookie";
 
 interface Address {
   name: string;
-  street: string;
+  address: string;
   city: string;
   state: string;
-  zip: string;
-  country: string;
+  phoneNumber: string;
 }
 
 export default function Cart() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, clearCart, cartId } = useCart();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "address" | "payment">("cart");
   const [shippingAddress, setShippingAddress] = useState<Address | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
-  // Calculate total amount
   const totalAmount = cart.reduce((acc: number, item: CartItem) => acc + item.price * item.quantity, 0);
+
+  const getAuthToken = () => {
+    return Cookies.get("jwt"); // Get JWT from cookies
+  };
+
+  const clearServerCart = async () => {
+    try {
+      if (!cartId) {
+        console.warn("No cart ID found - skipping server cart clear");
+        return;
+      }
+      
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const response = await fetch(`${API_URL}/cart/${cartId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to clear server cart");
+      }
+    } catch (err) {
+      console.error("Error clearing server cart:", err);
+    }
+  };
 
   const handleProceedToCheckout = () => {
     setCheckoutStep("address");
@@ -33,15 +66,74 @@ export default function Cart() {
     setCheckoutStep("payment");
   };
 
-  const handleConfirmPayment = () => {
-    // Handle payment logic here (e.g., call an API)
-    alert("Payment successful!");
+  const createOrder = async () => {
+    try {
+      if (!shippingAddress) {
+        throw new Error("Shipping address is missing");
+      }
+
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const formattedShippingAddress = `
+        ${shippingAddress.name},
+        ${shippingAddress.address},
+        ${shippingAddress.city}, ${shippingAddress.state}
+        Phone: ${shippingAddress.phoneNumber}
+      `.trim();
+
+      const orderData = {
+        items: cart.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity
+        })),
+        shipping_address: formattedShippingAddress,
+        payment_method: "mpesa"
+      };
+
+      const response = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create order");
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error("Order creation error:", err);
+      throw err;
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    try {
+      await createOrder();
+      await clearServerCart();
+      await clearCart();
+      setShowSuccessModal(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to complete order");
+    }
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
     setCheckoutStep("cart");
+    setError(null);
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar /> {/* Navbar stays at the top */}
+      <Navbar />
 
       <main className="flex-grow py-16 px-8">
         {checkoutStep === "cart" && (
@@ -67,7 +159,6 @@ export default function Cart() {
                   ))}
                 </div>
 
-                {/* Total Amount & Checkout Button */}
                 <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow-md text-center">
                   <h3 className="text-xl font-semibold">Total Amount: KSh {totalAmount.toLocaleString()}</h3>
                   <button
@@ -87,15 +178,57 @@ export default function Cart() {
         )}
 
         {checkoutStep === "payment" && shippingAddress && (
-          <Payment
-            onConfirm={handleConfirmPayment}
-            shippingAddress={shippingAddress}
-            totalAmount={totalAmount} // Pass the actual totalAmount
-          />
+          <>
+            <Payment
+              onConfirm={handleConfirmPayment}
+              shippingAddress={shippingAddress}
+              totalAmount={totalAmount}
+            />
+            {error && (
+              <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <p>{error}</p>
+              </div>
+            )}
+          </>
         )}
       </main>
 
-      <Footer /> {/* Footer stays at the bottom */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <h3 className="text-2xl font-bold text-gray-800 mt-4">Order Successful!</h3>
+              <p className="text-gray-600 mt-2">
+                Thank you for your purchase. Your order has been placed successfully.
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={closeSuccessModal}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Continue Shopping
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }

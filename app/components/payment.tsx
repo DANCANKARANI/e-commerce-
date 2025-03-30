@@ -6,19 +6,19 @@ interface PaymentProps {
   onConfirm: () => void;
   shippingAddress: {
     name: string;
-    street: string;
+    address: string;
     city: string;
     state: string;
-    zip: string;
-    country: string;
+    phoneNumber: string;
   };
   totalAmount: number;
 }
 
 export default function Payment({ onConfirm, shippingAddress, totalAmount }: PaymentProps) {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(shippingAddress.phoneNumber);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(e.target.value);
@@ -37,27 +37,35 @@ export default function Payment({ onConfirm, shippingAddress, totalAmount }: Pay
     }
 
     try {
-      // Initiate STK Push request
-      const response = await fetch("/api/initiate-mpesa-payment", {
+      // Convert phone number to Safaricom format (2547XXXXXXXX)
+      const formattedPhoneNumber = `254${phoneNumber.substring(1)}`;
+      
+      const response = await fetch(`${API_URL}/payments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phoneNumber: `254${phoneNumber.slice(1)}`, // Convert to Safaricom format (2547XXXXXXXX)
-          amount: totalAmount,
+          cost: totalAmount,
+          customer_phone: formattedPhoneNumber,
+          account_reference: "Nelius", // Using fixed reference as per your example
         }),
       });
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.message || "Payment initiation failed");
+      }
+
       if (data.success) {
-        onConfirm(); // Proceed to order confirmation
+        onConfirm();
       } else {
         setError(data.message || "Payment failed. Please try again.");
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      console.error("Payment error:", err);
+      setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -67,24 +75,21 @@ export default function Payment({ onConfirm, shippingAddress, totalAmount }: Pay
     <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Lipa Na M-Pesa</h2>
 
-      {/* Order Summary */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Order Summary</h3>
         <p>Total Amount: KES {totalAmount.toFixed(2)}</p>
       </div>
 
-      {/* Shipping Address */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Shipping Address</h3>
         <p>{shippingAddress.name}</p>
-        <p>{shippingAddress.street}</p>
+        <p>{shippingAddress.address}</p>
         <p>
-          {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zip}
+          {shippingAddress.city}, {shippingAddress.state}
         </p>
-        <p>{shippingAddress.country}</p>
+        <p>Phone: {shippingAddress.phoneNumber}</p>
       </div>
 
-      {/* Payment Form */}
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <input
@@ -98,10 +103,8 @@ export default function Payment({ onConfirm, shippingAddress, totalAmount }: Pay
           />
         </div>
 
-        {/* Error Message */}
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isProcessing}

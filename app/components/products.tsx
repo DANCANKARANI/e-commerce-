@@ -43,7 +43,6 @@ export default function Product() {
 
   const handleAddToCart = (product: Product) => {
     addToCart(product); // Pass the `Product` object directly
-    alert(`${product.name} added to cart!`);
   };
 
   const handleViewDetails = (product: Product) => {

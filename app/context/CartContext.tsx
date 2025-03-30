@@ -1,121 +1,144 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 
-// Define the CartItem type based on the backend CartItem model
 export type CartItem = {
-  id: string; // `id` is a string (UUID)
-  productId: string; // `productId` is a string (UUID)
+  id: string;
+  product_id: string;
   name: string;
-  price: number; // `price` is a number
+  price: number;
   image: string;
   quantity: number;
-  totalPrice: number; // `totalPrice` is calculated as price * quantity
+  totalPrice: number;
 };
 
-// Define the Product type from the API response (matching the backend Product model)
 type Product = {
-  id: string; // `id` is a string (UUID)
+  id: string;
   name: string;
-  price: number; // `price` is a number
-  image_url: string; // `image_url` is used instead of `image`
+  price: number;
+  image_url: string;
 };
 
 type CartContextType = {
+  cartId: string | null;
   cart: CartItem[];
-  addToCart: (item: Product) => Promise<void>; // Accept a Product object
-  removeFromCart: (id: string) => Promise<void>; // `id` is a string (UUID)
-  updateCartItemQuantity: (id: string, quantity: number) => Promise<void>; // Update item quantity
-  clearCart: () => Promise<void>; // Clear the entire cart
+  addToCart: (item: Product) => Promise<void>;
+  removeFromCart: (id: string) => Promise<void>;
+  updateCartItemQuantity: (id: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  clearError: () => void;
+  refreshCart: () => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartId, setCartId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load cart from localStorage
+  const clearError = () => setError(null);
+
+  const fetchCart = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      if (!token) {
+        setCart([]);
+        setCartId(null);
+        return;
+      }
+  
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/cart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const data = await response.json();
+  
+      // Check for empty cart response
+      if (data.id === "00000000-0000-0000-0000-000000000000" && 
+          data.user_id === "00000000-0000-0000-0000-000000000000") {
+        setCart([]);
+        setCartId(null);
+        return;
+      }
+  
+      if (!response.ok) {
+        throw new Error("Failed to load cart");
+      }
+  
+      // Handle both possible response formats
+      setCart(data.cartItems || data.items || []);
+      setCartId(data.id || data.cartId || null);
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      setError(error instanceof Error ? error.message : "Failed to load cart");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) setCart(JSON.parse(savedCart));
+    fetchCart();
   }, []);
 
-  // Save cart to localStorage
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+  const refreshCart = async () => {
+    setIsLoading(true);
+    await fetchCart();
+  };
 
-  // Add item to cart
   const addToCart = async (product: Product) => {
-    const cartItem: CartItem = {
-      id: crypto.randomUUID(), // Generate a unique ID for the cart item
-      productId: product.id, // Use the product's UUID
-      name: product.name,
-      price: product.price, // Use the product's price as a number
-      image: product.image_url, // Map `image_url` to `image`
-      quantity: 1,
-      totalPrice: product.price, // Initialize totalPrice as price * quantity (1)
-    };
-
+    setIsLoading(true);
     try {
-      // Get the JWT token from cookies
-      const token = Cookies.get("jwt"); // Replace "jwt" with your cookie name
-
+      const token = Cookies.get("jwt");
       if (!token) {
-        throw new Error("JWT token is missing");
+        throw new Error("Please login to add items to cart");
       }
 
-      // Save the cart item to the backend
+      const existingItem = cart.find(item => item.product_id === product.id);
+      const method = existingItem ? "PUT" : "POST";
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/cart/${product.id}`, {
-        method: "POST",
+        method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the JWT token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          quantity: cartItem.quantity,
-          price: cartItem.price,
+          quantity: existingItem ? existingItem.quantity + 1 : 1,
+          price: product.price,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add item to cart");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add item to cart");
       }
 
-      const data = await response.json();
-
-      // Update the local cart state with the response from the backend
-      setCart((prevCart) => {
-        const existingItem = prevCart.find((item) => item.productId === cartItem.productId);
-        if (existingItem) {
-          return prevCart.map((item) =>
-            item.productId === cartItem.productId
-              ? { ...item, quantity: item.quantity + 1, totalPrice: item.price * (item.quantity + 1) }
-              : item
-          );
-        }
-        return [...prevCart, cartItem];
-      });
+      await fetchCart();
     } catch (error) {
       console.error("Error adding item to cart:", error);
+      setError(error instanceof Error ? error.message : "Failed to add item to cart");
+      setIsLoading(false);
+      throw error;
     }
   };
 
-  // Remove item from cart
   const removeFromCart = async (id: string) => {
+    setIsLoading(true);
     try {
-      // Get the JWT token from cookies
-      const token = Cookies.get("jwt"); // Replace "jwt" with your cookie name
-
+      const token = Cookies.get("jwt");
       if (!token) {
-        throw new Error("JWT token is missing");
+        throw new Error("Please login to modify cart");
       }
 
-      // Remove the cart item from the backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/cart/${id}/remove`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`, // Include the JWT token
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -123,29 +146,28 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to remove item from cart");
       }
 
-      // Update the local cart state
-      setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+      await fetchCart();
     } catch (error) {
       console.error("Error removing item from cart:", error);
+      setError("Failed to remove item from cart");
+      setIsLoading(false);
+      throw error;
     }
   };
 
-  // Update item quantity in cart
   const updateCartItemQuantity = async (id: string, quantity: number) => {
+    setIsLoading(true);
     try {
-      // Get the JWT token from cookies
-      const token = Cookies.get("jwt"); // Replace "jwt" with your cookie name
-
+      const token = Cookies.get("jwt");
       if (!token) {
-        throw new Error("JWT token is missing");
+        throw new Error("Please login to update cart");
       }
 
-      // Update the cart item quantity on the backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/cart/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the JWT token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ quantity }),
       });
@@ -154,34 +176,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to update item quantity");
       }
 
-      // Update the local cart state
-      setCart((prevCart) =>
-        prevCart.map((item) =>
-          item.id === id
-            ? { ...item, quantity, totalPrice: item.price * quantity }
-            : item
-        )
-      );
+      await fetchCart();
     } catch (error) {
       console.error("Error updating item quantity:", error);
+      setError("Failed to update item quantity");
+      setIsLoading(false);
+      throw error;
     }
   };
 
-  // Clear the entire cart
   const clearCart = async () => {
+    setIsLoading(true);
     try {
-      // Get the JWT token from cookies
-      const token = Cookies.get("jwt"); // Replace "jwt" with your cookie name
-
+      const token = Cookies.get("jwt");
       if (!token) {
-        throw new Error("JWT token is missing");
+        throw new Error("Please login to clear cart");
       }
 
-      // Clear the cart on the backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/cart`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`, // Include the JWT token
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -189,16 +204,29 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to clear cart");
       }
 
-      // Update the local cart state
-      setCart([]);
+      await fetchCart();
     } catch (error) {
       console.error("Error clearing cart:", error);
+      setError("Failed to clear cart");
+      setIsLoading(false);
+      throw error;
     }
   };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateCartItemQuantity, clearCart }}
+      value={{
+        cartId,
+        cart,
+        addToCart,
+        removeFromCart,
+        updateCartItemQuantity,
+        clearCart,
+        isLoading,
+        error,
+        clearError,
+        refreshCart,
+      }}
     >
       {children}
     </CartContext.Provider>

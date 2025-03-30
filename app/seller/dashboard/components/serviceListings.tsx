@@ -4,13 +4,38 @@ import Cookies from "js-cookie"; // Import js-cookie to handle cookies
 // API URL
 const API_URL = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
+// Define category types
+type CategorySlug =
+  | "graphic-design"
+  | "tutoring"
+  | "web-development"
+  | "photography"
+  | "writing-editing"
+  | "music-audio"
+  | "marketing"
+  | "fitness-wellness"
+  | "others";
+
+// Category mapping
+const categoryNames: Record<CategorySlug, string> = {
+  "graphic-design": "Graphic Design",
+  tutoring: "Tutoring",
+  "web-development": "Web Development",
+  photography: "Photography",
+  "writing-editing": "Writing & Editing",
+  "music-audio": "Music & Audio",
+  marketing: "Marketing",
+  "fitness-wellness": "Fitness & Wellness",
+  others: "Others",
+};
+
 export default function ServiceListings() {
   // State for form data
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: 0,
-    category: "",
+    category: "graphic-design", // Default category
     is_active: true,
   });
 
@@ -22,7 +47,7 @@ export default function ServiceListings() {
   const jwtToken = Cookies.get("jwt");
 
   // Handle form input changes
-  const handleInputChange = (e: { target: { name: any; value: any } }) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -31,7 +56,7 @@ export default function ServiceListings() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate required fields
@@ -135,19 +160,24 @@ export default function ServiceListings() {
             />
           </div>
 
-          {/* Category Field */}
+          {/* Category Field (Dropdown) */}
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
               Category:
             </label>
-            <input
-              type="text"
+            <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
               required
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
+            >
+              {Object.entries(categoryNames).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Is Active Field */}

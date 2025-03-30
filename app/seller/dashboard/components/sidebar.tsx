@@ -6,7 +6,7 @@ export const Sidebar = ({ onSelect }: { onSelect: (component: string) => void })
     // Add your logout logic here (e.g., clear cookies, redirect to login page)
     console.log("User logged out");
     // Example: Redirect to login page
-    window.location.href = "/login";
+    window.location.href = "/seller";
   };
 
   return (

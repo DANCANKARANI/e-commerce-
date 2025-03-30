@@ -33,8 +33,8 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-md py-4 px-8 flex justify-between items-center fixed w-full top-0 z-50">
       {/* Logo */}
-      <h1 className="text-2xl font-bold text-blue-600">Campus Market</h1>
-
+      <h1 className="text-2xl font-bold text-blue-600">(C.M) Campus Market</h1>
+ 
       {/* Desktop Navigation Links */}
       <div className="hidden md:flex space-x-6">
         <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors">
@@ -45,6 +45,9 @@ export default function Navbar() {
         </Link>
         <Link href="/how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors">
           How It Works
+        </Link>
+        <Link href="/ratings" className="text-gray-600 hover:text-blue-600 transition-colors">
+          Ratings
         </Link>
         <Link href="/contact" className="text-gray-600 hover:text-blue-600 transition-colors">
           Contact
