@@ -93,8 +93,8 @@ export default function DashboardComponent() {
       
       const [usersRes, productsRes, servicesRes, ordersRes] = await Promise.all([
         fetch(`${API_URL}/user/all`),
-        fetch(`${API_URL}/products`),
-        fetch(`${API_URL}/services`),
+        fetch(`${API_URL}/products/all`),
+        fetch(`${API_URL}/services/all`),
         fetch(`${API_URL}/orders`)
       ]);
 
