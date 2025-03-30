@@ -37,7 +37,6 @@ export default function Sidebar({ onSelect, currentComponent }: SidebarProps) {
     },
     {
       id: "systemReports",
-      name: "System Reports",
       icon: <FileText className="w-5 h-5" />,
     },
   ];
