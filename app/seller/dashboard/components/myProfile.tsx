@@ -24,7 +24,8 @@ export default function MyProfile() {
   // State for editable fields
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: "",
+    first_name: "",
+    last_name:"",
     phone_number: "",
     email: "",
     profile_photo_path: "",
@@ -49,7 +50,8 @@ export default function MyProfile() {
         const data = await response.json();
         setUser(data.data); // Set the user state
         setFormData({
-          full_name: data.data.full_name,
+          first_name: data.data.first_name,
+          last_name:data.data.last_name,
           phone_number: data.data.phone_number,
           email: data.data.email,
           profile_photo_path: data.data.profile_photo_path,
@@ -159,7 +161,7 @@ export default function MyProfile() {
                   <input
                     type="text"
                     name="full_name"
-                    value={formData.full_name}
+                    value={formData.first_name+" "+ formData.last_name}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
